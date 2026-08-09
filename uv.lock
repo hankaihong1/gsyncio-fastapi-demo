@@ -72,22 +72,19 @@ wheels = [
 [[package]]
 name = "gsyncio"
 version = "0.1.0"
-source = { editable = "../gsyncio" }
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "maturin", extras = ["zig"], specifier = ">=1.13.3" },
-    { name = "mypy", specifier = ">=2.3.0" },
-    { name = "pyright", specifier = ">=1.1.411" },
-    { name = "pytest", specifier = ">=9.1.1" },
-    { name = "pytest-asyncio", specifier = ">=1.4.0" },
-    { name = "pytest-benchmark", specifier = ">=5.1.0" },
-    { name = "pytest-repeat", specifier = ">=0.9.4" },
-    { name = "pytest-timeout", specifier = ">=2.3.1" },
-    { name = "ruff", specifier = ">=0.16.1" },
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/60/31/281b88f4ef73bdb97c1530863cfbdba462dfbad9b3bd91637ff53461716e/gsyncio-0.1.0.tar.gz", hash = "sha256:d3d7ecf4c1d6238bc1c38ab1b5c6f0e3010a90184120cb98b73e0685521ec4d6", size = 163158, upload-time = "2026-08-09T06:40:24.359Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/32/00/8482ca6ece380920b79d3f64f0da085ca2979956d74761bf7a087324a51c/gsyncio-0.1.0-cp314-cp314-macosx_10_12_x86_64.whl", hash = "sha256:041c8138917d61934076e9b9026a5119cec1164f27cbc72f2b2be0b98b792f02", size = 272631, upload-time = "2026-08-09T06:40:09.116Z" },
+    { url = "https://files.pythonhosted.org/packages/23/74/4ff81612ee04dd8a672a3d36759526ec391969ed6e0a221c4b2091deaeb8/gsyncio-0.1.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:a478a3060ec69613e495483ab3faacbd4fd466427328803388597e0e046c48ef", size = 263447, upload-time = "2026-08-09T06:40:10.87Z" },
+    { url = "https://files.pythonhosted.org/packages/d1/91/118fca641fee5a996ecb5cd80dcebcf2ed849072566aeb77276aed569212/gsyncio-0.1.0-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5332f8540aa280b49a344c6c5f43c0a4c274695faabf05f2f5c8005c1a3dc9f2", size = 274887, upload-time = "2026-08-09T06:40:12.42Z" },
+    { url = "https://files.pythonhosted.org/packages/b2/5b/1bbdba04a956b8140d66cba0d36afc15bfb60034df52ce7b1eb30b16d881/gsyncio-0.1.0-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b804ce579f1d9f64117ea1fd83fde2e5f1d6929bdcd4cfa6790949ec9e2f1f2b", size = 281290, upload-time = "2026-08-09T06:40:13.854Z" },
+    { url = "https://files.pythonhosted.org/packages/f6/07/771f0eb0076e608a7da016dfaac5531e95eaeeae794ef1302c019e9cb4e5/gsyncio-0.1.0-cp314-cp314-win_amd64.whl", hash = "sha256:3c5b77522160e2b60675d3ea986aae1167e5613361107234653c42bdda993875", size = 195144, upload-time = "2026-08-09T06:40:15.217Z" },
+    { url = "https://files.pythonhosted.org/packages/7b/53/c6e8e2d3df0955d5383eb2569f0895c8f88c1cbc9af7c6892378d8df2634/gsyncio-0.1.0-cp314-cp314t-macosx_10_12_x86_64.whl", hash = "sha256:a26edfaa81923b7609eb837f4a8eb750869bcd98987e06dce791990797171f05", size = 272506, upload-time = "2026-08-09T06:40:16.594Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/4a/1d569e51599c876d05adefd6a85947e050cdf1244e695687c8b6fc7972ef/gsyncio-0.1.0-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:e8ee8c2f7a99bc0c4ee497b2efd02d70eef01e5442472aaa9dd9bcc2daf175f4", size = 262391, upload-time = "2026-08-09T06:40:18.198Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/67/bfeec19537c00b70f5d2e6e6f6b8e4089bedffc1fb976f00a11a8a6de58a/gsyncio-0.1.0-cp314-cp314t-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ae86305a89719cefb403c01b927f1c81f36bd0c7d8f9fcf0fac76e1bea12b2e1", size = 273902, upload-time = "2026-08-09T06:40:19.931Z" },
+    { url = "https://files.pythonhosted.org/packages/74/6c/05f99f2e620f0ead909debff3858481ecb11fe790f79c1b96f17a8d6411d/gsyncio-0.1.0-cp314-cp314t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:beb9915f4b66613e8034f15a84bf903b01e981478475245284fbaa7c0daff2b4", size = 281187, upload-time = "2026-08-09T06:40:21.308Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/57/579fef8850845ad6366c202b2cd40629ffee8dd06a5d0381812b024af3f1/gsyncio-0.1.0-cp314-cp314t-win_amd64.whl", hash = "sha256:eebd0a031f87e05f3491377ecad260d17e4067ad992a4b4e02c020b95fe26445", size = 196340, upload-time = "2026-08-09T06:40:23.014Z" },
 ]
 
 [[package]]
@@ -107,7 +104,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.115" },
-    { name = "gsyncio", editable = "../gsyncio" },
+    { name = "gsyncio", specifier = ">=0.1.0" },
 ]
 
 [package.metadata.requires-dev]

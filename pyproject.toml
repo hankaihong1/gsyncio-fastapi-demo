@@ -8,9 +8,8 @@ dependencies = [
     "gsyncio>=0.1.0",
 ]
 
-[tool.uv.sources]
-gsyncio = { path = "../gsyncio", editable = true }
-
+# uvicorn 仅供 benchmark.py 压测对比使用（demo 服务器本身用
+# GsyncioASGIWorker，不需要 uvicorn）。
 [dependency-groups]
 dev = [
     "uvicorn>=0.30",

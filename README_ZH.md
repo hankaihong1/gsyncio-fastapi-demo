@@ -80,8 +80,9 @@
 - **Python 3.14t（自由线程）**——由 `.python-version`（`3.14t`）固定。
   如果改成 `3.14`（GIL 版），本演示要展示的并行能力会被静默禁用。
 - **uv**——唯一使用的包管理器。
-- **gsyncio**——声明为指向 `../gsyncio` 的 editable 路径依赖，本地改
-  gsyncio 源码无需重新 `uv sync` 即可生效。
+- **gsyncio**——从 PyPI 安装（`>=0.1.0`；Windows/macOS/Linux 都有
+  cp314t wheel）。不需要本地 checkout——这正是 `uv sync` 在任何机器上
+  都能跑的原因。
 - macOS / Linux / Windows（macOS/Linux 用多 acceptor 惊群；Windows
   按设计只用单 acceptor——见 `gsyncio/server.py`）。
 
@@ -145,8 +146,10 @@ curl -s http://127.0.0.1:8000/api/status  # 实时 pool metrics + 请求计数
    创建 GIL venv，演示的并行能力会被静默丢掉。
 3. **在本机从 Hermes 会话跑 `uv run` 时加 `PYTHONPATH=''` 前缀**
    （见[快速开始](#快速开始)的说明）。
-4. **gsyncio 是 editable 路径依赖。** 修改 `../gsyncio` 立即生效，
-   无需重新 sync。
+4. **gsyncio 从 PyPI 安装**（`>=0.1.0`）。本地开发 gsyncio 时，
+   用 `uv add --editable ../gsyncio` 切换到 editable checkout（会在
+   `pyproject.toml` 里加 `[tool.uv.sources]` 覆盖）；完成后用
+   `uv remove gsyncio && uv add gsyncio` 恢复 PyPI 源。
 5. **状态表用 middleware 计数，不是 pool 的 `completed_tasks`**——
    HTTP 请求不经过 submit 队列（见[工作原理](#工作原理)）。
 6. **默认端口 8000**；用 `python app.py --port N` 覆盖。

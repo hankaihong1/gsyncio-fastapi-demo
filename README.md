@@ -83,8 +83,9 @@ shows per-thread request counts from the middleware, not pool metrics.
   (`3.14t`). A plain `3.14` (GIL build) silently disables the parallelism
   this demo exists to show.
 - **uv** — the only package manager used.
-- **gsyncio** — declared as an editable path dependency pointing at
-  `../gsyncio`, so local gsyncio edits take effect without re-`sync`ing.
+- **gsyncio** — installed from PyPI (`>=0.1.0`; cp314t wheels exist for
+  Windows/macOS/Linux). No local checkout required — this is what makes
+  `uv sync` work on any machine.
 - macOS / Linux / Windows (macOS/Linux get the multi-acceptor thundering
   herd; Windows runs a single acceptor by design — see
   `gsyncio/server.py`).
@@ -150,8 +151,10 @@ The status endpoint returns the engine's real state, e.g.:
    `uv sync` create a GIL venv and the demo silently loses all parallelism.
 3. **Prefix `PYTHONPATH=''`** on this machine when running `uv run` from a
    Hermes session (see the note in [Quick start](#quick-start)).
-4. **gsyncio is an editable path dependency.** Edits to `../gsyncio` are
-   picked up immediately; no re-sync needed.
+4. **gsyncio comes from PyPI** (`>=0.1.0`). For local gsyncio development,
+   switch to the editable checkout with `uv add --editable ../gsyncio`
+   (this adds a `[tool.uv.sources]` override in `pyproject.toml`); when
+   done, revert with `uv remove gsyncio && uv add gsyncio`.
 5. **The status table uses middleware counts, not pool `completed_tasks`**
    — HTTP requests bypass the submit queue (see [How it works](#how-it-works)).
 6. **Port 8000 is the default**; override with `python app.py --port N`.
