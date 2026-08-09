@@ -2,39 +2,28 @@
 
 **[中文版 (Chinese)](README_ZH.md)**
 
-A minimal, runnable demonstration of running a **FastAPI** application on
+A product-page demo that runs a **FastAPI** application on
 [gsyncio](https://github.com/hankaihong1/gsyncio) — the multi-event-loop
 engine for **Python 3.14t (Free-Threaded / no-GIL)** — **instead of uvicorn**.
 
-Open the demo page in a browser, click one button, and watch 6 concurrent
-requests get spread across 4 worker event-loop threads and finish in ~0.31s
-instead of the ~1.8s a serial server would take.
-
----
-
-## Table of Contents
-
-- [What this project is](#what-this-project-is)
-- [Why not uvicorn?](#why-not-uvicorn)
-- [How it works](#how-it-works)
-- [Requirements](#requirements)
-- [Quick start](#quick-start)
-- [Directory layout](#directory-layout)
-- [Verifying it works](#verifying-it-works)
-- [Notes for AI agents](#notes-for-ai-agents)
+The page is a live proof, not a screenshot: it is served by
+`GsyncioASGIWorker`, and the status section on it polls the real
+`EventLoopThreadPool.get_metrics()` every 2 seconds — visitors can watch
+the 4 event-loop threads count requests in real time.
 
 ---
 
 ## What this project is
 
-This is a **demo**, not a production template. Its single purpose is to show
-gsyncio's core value proposition: in free-threaded Python 3.14t, multiple
-independent asyncio event loops running on separate OS threads can serve
-requests **in true parallel**, with no GIL contention.
+A minimal, runnable demo with two goals:
 
-The web app itself is intentionally trivial: one HTML page with a button,
-and one JSON endpoint that simulates 0.3s of I/O latency per request
-(`asyncio.sleep`, standing in for a database query or external API call).
+1. **Show gsyncio works** — the page you open is being served by gsyncio's
+   own ASGI worker, and its live status numbers come from the engine itself.
+2. **Show the README as a real page** — hero, features, code samples, quick
+   start; a landing page someone can actually look at.
+
+The web app is intentionally simple: one HTML page + a status endpoint
+(`/api/status`) + a health-check endpoint (`/api/ping`).
 
 ## Why not uvicorn?
 
@@ -49,9 +38,8 @@ exercises on purpose. It is a small ASGI 3.0 HTTP server built on
   the handler coroutine runs on that loop's thread, zero cross-thread IPC.
 - The FastAPI/Starlette app is invoked as a plain ASGI callable.
 
-It supports the HTTP/1.1 subset the demo needs (GET/POST, Content-Length
-bodies, simple responses). It is **not** a uvicorn replacement for
-production — no HTTP/2, no chunked transfer encoding, no TLS.
+It supports the HTTP/1.1 subset the demo needs. It is **not** a uvicorn
+replacement for production — no HTTP/2, no chunked transfer encoding, no TLS.
 
 > ⚠️ For AI agents: do **not** "fix" this project by switching to uvicorn.
 > The whole point is running FastAPI on gsyncio's own worker.
@@ -80,11 +68,14 @@ Key pieces in `app.py`:
 |---|---|
 | `EventLoopThreadPool(num_threads=4)` | 4 OS threads, each running an isolated asyncio loop |
 | `GsyncioASGIWorker(app, pool, host, port)` | Mounts the FastAPI app on the pool; replaces uvicorn |
+| `count_requests` middleware | Counts every request per worker thread (the live numbers on the page) |
+| `/api/status` | Returns `pool.get_metrics()` + per-thread request counts + uptime |
 | `async with pool` + `await worker.start()` | Context-managed lifecycle: clean shutdown on Ctrl+C |
-| `await asyncio.Event().wait()` | Holds the main coroutine so the server runs forever |
 
-The `thread_counter` in `app.py` records which worker thread handled each
-request — the demo page renders this so you can *see* the load balancing.
+One subtlety: HTTP requests served by `GsyncioASGIWorker` are `await`ed
+directly and do **not** go through the `pool.submit()` queue, so
+`completed_tasks` in the pool metrics stays 0 for them. The page therefore
+shows per-thread request counts from the middleware, not pool metrics.
 
 ## Requirements
 
@@ -106,8 +97,7 @@ uv sync                     # installs fastapi + gsyncio (editable) into .venv
 uv run python app.py        # start the server on http://127.0.0.1:8000
 ```
 
-Then open <http://127.0.0.1:8000> and click **发起 6 个并发请求**
-("fire 6 concurrent requests").
+Then open <http://127.0.0.1:8000> — the status section refreshes every 2s.
 
 > **Hermes/macOS note:** if the server crashes at import time with
 > `ModuleNotFoundError: pydantic_core._pydantic_core` or imports a wrong
@@ -122,6 +112,7 @@ gsyncio-fastapi-demo/
 ├── .python-version          # 3.14t — MUST stay free-threaded
 ├── pyproject.toml           # fastapi dep + gsyncio editable path source
 ├── app.py                   # the whole demo: FastAPI app + gsyncio deploy
+├── benchmark.py             # dev tool: ab-based uvicorn vs gsyncio comparison
 ├── README.md                # this file (English)
 ├── README_ZH.md             # Chinese mirror — keep in sync
 └── .hermes/environment.json # hermes verify recipe (custom start command)
@@ -139,38 +130,32 @@ hermes verify --json
 Manual:
 
 ```bash
-# 8 requests one after another — expect ~2.4s total
-for i in $(seq 1 8); do curl -s http://127.0.0.1:8000/api/demo; echo; done
-
-# 8 requests at once — expect ~0.3–0.6s total, spread across 4 threads
-for i in $(seq 1 8); do curl -s http://127.0.0.1:8000/api/demo & done; wait
+curl -s http://127.0.0.1:8000/api/ping    # {"pong": true} — server is alive
+curl -s http://127.0.0.1:8000/api/status  # live pool metrics + request counts
 ```
 
-The API returns the handling thread per request, e.g.:
+The status endpoint returns the engine's real state, e.g.:
 
 ```json
-{"thread": "EventLoopThread-2", "elapsed_ms": 301.1, "count": 6}
+{"metrics": {"is_running": true, "thread_count": 4, ...},
+ "total_requests": 10, "threads": {"EventLoopThread-0": 5, ...}, "uptime": "42s"}
 ```
-
-Measured on Apple M1 (8 GB), Python 3.14.6t:
-
-| Scenario | Total time | Speedup |
-|---|---|---|
-| Serial (8 × 0.3s) | 2.52 s | 1.0× |
-| gsyncio 4 loops, concurrent | 0.34 s | **7.5×** |
 
 ## Notes for AI agents
 
 1. **Do not switch the server to uvicorn.** The project exists to demo
-   `GsyncioASGIWorker`; `uvicorn` is not even a dependency.
+   `GsyncioASGIWorker`; `uvicorn` is only a dev dependency for
+   `benchmark.py`.
 2. **Keep `.python-version` at `3.14t`.** Changing it back to `3.14` makes
    `uv sync` create a GIL venv and the demo silently loses all parallelism.
 3. **Prefix `PYTHONPATH=''`** on this machine when running `uv run` from a
    Hermes session (see the note in [Quick start](#quick-start)).
 4. **gsyncio is an editable path dependency.** Edits to `../gsyncio` are
    picked up immediately; no re-sync needed.
-5. **Port 8000 is hardcoded** in `app.py`; change it there if occupied.
-6. **EN/ZH READMEs must stay in sync** — same sections, same headings,
+5. **The status table uses middleware counts, not pool `completed_tasks`**
+   — HTTP requests bypass the submit queue (see [How it works](#how-it-works)).
+6. **Port 8000 is the default**; override with `python app.py --port N`.
+7. **EN/ZH READMEs must stay in sync** — same sections, same headings,
    same code blocks; only the language differs.
 
 ---

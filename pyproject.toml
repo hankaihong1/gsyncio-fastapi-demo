@@ -10,3 +10,8 @@ dependencies = [
 
 [tool.uv.sources]
 gsyncio = { path = "../gsyncio", editable = true }
+
+[dependency-groups]
+dev = [
+    "uvicorn>=0.30",
+]
