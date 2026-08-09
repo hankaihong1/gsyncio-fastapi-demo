@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "recipe": {
+    "name": "gsyncio-fastapi-demo (FastAPI on GsyncioASGIWorker)",
+    "kind": "custom",
+    "bootstrap": [
+      "uv sync"
+    ],
+    "build": [],
+    "test": [],
+    "start": "PYTHONPATH='' .venv/bin/python app.py",
+    "port": 8000,
+    "readinessPath": "/",
+    "evidence": [
+      "gsyncio demo: FastAPI app served by GsyncioASGIWorker (not uvicorn)"
+    ]
+  },
+  "updatedAt": "2026-08-09T07:47:01.514073+00:00"
+}

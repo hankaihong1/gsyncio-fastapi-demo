@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+
+# OS
+.DS_Store
+
+# 说明：.hermes/environment.json 是 hermes verify 的配方文件（自定义
+# 启动命令），应该提交；.hermes/ 下其他运行时缓存不入库。
+.hermes/*
+!.hermes/environment.json

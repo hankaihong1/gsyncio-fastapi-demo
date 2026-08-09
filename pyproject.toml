@@ -1,0 +1,12 @@
+[project]
+name = "gsyncio-fastapi-demo"
+version = "0.1.0"
+description = "FastAPI demo website deployed on gsyncio (multi-event-loop engine for Python 3.14t)"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.115",
+    "gsyncio>=0.1.0",
+]
+
+[tool.uv.sources]
+gsyncio = { path = "../gsyncio", editable = true }
