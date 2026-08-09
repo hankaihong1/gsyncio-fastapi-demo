@@ -6,9 +6,9 @@
 [gsyncio](https://github.com/hankaihong1/gsyncio)（面向 **Python 3.14t
 自由线程 / 无 GIL** 的多事件循环引擎）上，**而不是 uvicorn**。
 
-浏览器打开演示页面，点一个按钮，就能看到 8 个并发请求被分散到 4 个
-worker 事件循环线程上并行处理，总耗时约 0.34s——而串行服务器需要约
-2.4s。
+浏览器打开演示页面，点一个按钮，就能看到 6 个并发请求被分散到 4 个
+worker 事件循环线程上并行处理，总耗时约 0.31s——而串行服务器需要约
+1.8s。
 
 ---
 
@@ -101,7 +101,7 @@ uv sync                     # 安装 fastapi + gsyncio (editable) 到 .venv
 uv run python app.py        # 启动服务器，监听 http://127.0.0.1:8000
 ```
 
-然后打开 <http://127.0.0.1:8000>，点击 **发起 8 个并发请求**。
+然后打开 <http://127.0.0.1:8000>，点击 **发起 6 个并发请求**。
 
 > **Hermes/macOS 提示：** 如果服务器启动时 import 报错
 > `ModuleNotFoundError: pydantic_core._pydantic_core` 或导入了错误的

@@ -6,9 +6,9 @@ A minimal, runnable demonstration of running a **FastAPI** application on
 [gsyncio](https://github.com/hankaihong1/gsyncio) — the multi-event-loop
 engine for **Python 3.14t (Free-Threaded / no-GIL)** — **instead of uvicorn**.
 
-Open the demo page in a browser, click one button, and watch 8 concurrent
-requests get spread across 4 worker event-loop threads and finish in ~0.34s
-instead of the ~2.4s a serial server would take.
+Open the demo page in a browser, click one button, and watch 6 concurrent
+requests get spread across 4 worker event-loop threads and finish in ~0.31s
+instead of the ~1.8s a serial server would take.
 
 ---
 
@@ -106,8 +106,8 @@ uv sync                     # installs fastapi + gsyncio (editable) into .venv
 uv run python app.py        # start the server on http://127.0.0.1:8000
 ```
 
-Then open <http://127.0.0.1:8000> and click **发起 8 个并发请求**
-("fire 8 concurrent requests").
+Then open <http://127.0.0.1:8000> and click **发起 6 个并发请求**
+("fire 6 concurrent requests").
 
 > **Hermes/macOS note:** if the server crashes at import time with
 > `ModuleNotFoundError: pydantic_core._pydantic_core` or imports a wrong

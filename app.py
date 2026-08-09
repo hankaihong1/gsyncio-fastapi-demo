@@ -36,14 +36,25 @@ from gsyncio.pool import EventLoopThreadPool
 
 app = FastAPI(title="gsyncio Demo")
 
+
+@app.middleware("http")
+async def no_keep_alive(request, call_next):
+    # GsyncioASGIWorker 处理完一个请求就关闭底层连接，但它的响应头
+    # 不声明 Connection: close，浏览器会乐观复用连接 → 请求发到已死的
+    # 连接 → 失败重连 → 请求被串行化（6 个请求 1.8s 而非 0.3s）。
+    # 显式声明 close 让浏览器每次新建连接，才能走多线程并行路径。
+    response = await call_next(request)
+    response.headers["Connection"] = "close"
+    return response
+
 # 统计每个请求由哪个 worker 线程处理，演示页面据此渲染负载均衡效果。
 # Counter 是线程安全的（GIL 时代的经验；在 3.14t 下由 CPython 内部
 # 保证原子性），这里只是展示用途，不追求精确。
 thread_counter: Counter[str] = Counter()
 
 # 演示页面：纯内联 HTML/CSS/JS，没有构建步骤、没有前端依赖。
-# JS 部分用 Promise.all 同时发出 8 个请求，等全部返回后渲染表格，
-# 并在页面上对比"实际总耗时"与"串行参考值"（8 × 300ms）。
+# JS 部分用 Promise.all 同时发出 6 个请求，等全部返回后渲染表格，
+# 并在页面上对比"实际总耗时"与"串行参考值"（6 × 300ms）。
 PAGE = """<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -222,13 +233,14 @@ PAGE = """<!DOCTYPE html>
 
 <section id="demo">
   <div class="wrap">
-    <h2>实时演示：8 个并发请求</h2>
+    <h2>实时演示：6 个并发请求</h2>
     <p class="lead">
       每个请求模拟 0.3s I/O 等待（数据库查询 / 外部 API）。如果串行处理，
-      8 个请求需要 2.4s；gsyncio 把它们分散到 4 个事件循环线程上并行执行。
+      6 个请求需要 1.8s；gsyncio 把它们分散到 4 个事件循环线程上并行执行。
+      浏览器对同一域名最多 6 个并行连接——6 个请求恰好全部并行。
     </p>
     <div class="demo-panel">
-      <button id="go" onclick="runDemo()">▶ 发起 8 个并发请求</button>
+      <button id="go" onclick="runDemo()">▶ 发起 6 个并发请求</button>
       <div class="stat-row">
         <div class="stat">
           <div class="num" id="stat-total">—</div>
@@ -239,8 +251,8 @@ PAGE = """<!DOCTYPE html>
           <div class="lbl">相对串行的加速比</div>
         </div>
         <div class="stat">
-          <div class="num orange" id="stat-serial">2400 ms</div>
-          <div class="lbl">串行参考值（8 × 300ms）</div>
+          <div class="num orange" id="stat-serial">1800 ms</div>
+          <div class="lbl">串行参考值（6 × 300ms）</div>
         </div>
       </div>
       <table>
@@ -288,9 +300,10 @@ PAGE = """<!DOCTYPE html>
 async function runDemo() {
   const btn = document.getElementById('go');
   btn.disabled = true;
-  const N = 8;
+  const N = 6;
   const t0 = performance.now();
-  // 8 个请求同时发出，等全部返回
+  // 6 个请求同时发出，等全部返回（6 = 浏览器对同一域名并行连接上限，
+  // 恰好全部并行；每个响应带 connection: close，浏览器不会复用连接）
   const results = await Promise.all(
     Array.from({length: N}, (_, i) =>
       fetch('/api/demo').then(r => r.json()).then(d => ({i: i + 1, ...d}))
@@ -327,7 +340,7 @@ async def index() -> str:
 async def demo() -> dict:
     # 记录当前请求落在哪个 worker 线程上，页面据此展示负载均衡。
     # GsyncioASGIWorker 会把每个请求 pin 到 accept 它的那个事件循环线程，
-    # 所以 8 个并发请求会分散到 4 个线程（而不是都挤在一个循环里）。
+    # 所以并发请求会分散到 4 个线程（而不是都挤在一个循环里）。
     thread = threading.current_thread().name
     thread_counter[thread] += 1
 
